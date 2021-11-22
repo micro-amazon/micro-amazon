@@ -3,6 +3,10 @@ jkopt1="--sessionTimeout=1440"
 jkopt2="--sessionEviction=86400"
 jvopt1="-Duser.timezone=Asia/Seoul"
 
+helm repo add jenkins https://charts.jenkins.io
+helm repo update
+helm show values jenkins/jenkins > jenkins-values.yaml
+
 helm install jenkins jenkins/jenkins \
 --set persistence.existingClaim=false \
 --set controller.adminPassword=admin \
@@ -11,4 +15,5 @@ helm install jenkins jenkins/jenkins \
 --set controller.serviceType=NodePort \
 --set controller.servicePort=80 \
 --set controller.jenkinsOpts="$jkopt1 $jkopt2" \
---set controller.javaOpts="$jvopt1"
+--set controller.javaOpts="$jvopt1" \
+-f jenkins-values.yaml
