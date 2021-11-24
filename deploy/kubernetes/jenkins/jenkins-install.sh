@@ -3,10 +3,6 @@ jkopt1="--sessionTimeout=1440"
 jkopt2="--sessionEviction=86400"
 jvopt1="-Duser.timezone=Asia/Seoul"
 
-helm repo add jenkins https://charts.jenkins.io
-helm repo update
-helm show values jenkins/jenkins > jenkins-values.yaml
-
 helm install jenkins jenkins/jenkins \
 --set persistence.existingClaim=false \
 --set controller.adminPassword=admin \
@@ -17,3 +13,12 @@ helm install jenkins jenkins/jenkins \
 --set controller.jenkinsOpts="$jkopt1 $jkopt2" \
 --set controller.javaOpts="$jvopt1" \
 -f jenkins-values.yaml
+
+# Create a ServiceAccount named `jenkins-robot` in a given namespace.
+kubectl -n 'sock-shop' create serviceaccount jenkins-robot
+# The next line gives `jenkins-robot` administator permissions for this namespace.
+# * You can make it an admin over all namespaces by creating a `ClusterRoleBinding` instead of a `RoleBinding`.
+# * You can also give it different permissions by binding it to a different `(Cluster)Role`.
+kubectl -n 'sock-shop' create rolebinding jenkins-robot-binding --clusterrole=cluster-admin --serviceaccount='sock-shop':jenkins-robot
+
+kubectl port-forward --address 0.0.0.0 svc/jenkins 8080:80 &
