@@ -873,6 +873,57 @@ spec:
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin
+  labels:
+    name: admin
+  namespace: sock-shop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: admin
+  template:
+    metadata:
+      labels:
+        name: admin
+    spec:
+      containers:
+      - name: admin
+        image: zwan2/micro-amazon-admin
+        env:
+         - name: JAVA_OPTS
+           value: -Xms64m -Xmx128m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom -Dspring.zipkin.enabled=false
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 300Mi
+        ports:
+        - containerPort: 80
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 10001
+          capabilities:
+            drop:
+              - all
+            add:
+              - NET_BIND_SERVICE
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp-volume
+      volumes:
+        - name: tmp-volume
+          emptyDir:
+            medium: Memory
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -887,4 +938,77 @@ spec:
     targetPort: 27017
   selector:
     name: user-db
-
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin
+  annotations:
+        prometheus.io/scrape: 'true'
+  labels:
+    name: admin
+  namespace: sock-shop
+spec:
+  ports:
+    # the port that this service should serve on
+  - port: 80
+    targetPort: 80
+  selector:
+    name: admin
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-db
+  labels:
+    name: admin-db
+  namespace: sock-shop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: admin-db
+  template:
+    metadata:
+      labels:
+        name: admin-db
+    spec:
+      containers:
+      - name: admin-db
+        image: mongo
+        ports:
+        - name: mongo
+          containerPort: 27017
+        securityContext:
+          capabilities:
+            drop:
+              - all
+            add:
+              - CHOWN
+              - SETGID
+              - SETUID
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp-volume
+      volumes:
+        - name: tmp-volume
+          emptyDir:
+            medium: Memory
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-db
+  labels:
+    name: admin-db
+  namespace: sock-shop
+spec:
+  ports:
+    # the port that this service should serve on
+  - port: 27017
+    targetPort: 27017
+  selector:
+    name: admin-db
