@@ -3,6 +3,11 @@ jkopt1="--sessionTimeout=1440"
 jkopt2="--sessionEviction=86400"
 jvopt1="-Duser.timezone=Asia/Seoul"
 
+sudo snap install helm --classic
+
+helm repo add jenkins https://charts.jenkins.io
+helm repo update
+
 helm install jenkins jenkins/jenkins \
 --set persistence.existingClaim=false \
 --set controller.adminPassword=admin \
@@ -21,4 +26,4 @@ kubectl -n 'sock-shop' create serviceaccount jenkins-robot
 # * You can also give it different permissions by binding it to a different `(Cluster)Role`.
 kubectl -n 'sock-shop' create rolebinding jenkins-robot-binding --clusterrole=cluster-admin --serviceaccount='sock-shop':jenkins-robot
 
-kubectl port-forward --address 0.0.0.0 svc/jenkins 8080:80 &
+kubectl port-forward --address 0.0.0.0 svc/jenkins 8080:8080 &
