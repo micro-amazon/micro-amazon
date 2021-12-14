@@ -20,10 +20,10 @@ helm install jenkins jenkins/jenkins \
 -f jenkins-values.yaml
 
 # Create a ServiceAccount named `jenkins-robot` in a given namespace.
-kubectl -n 'sock-shop' create serviceaccount jenkins-robot
+# kubectl -n 'sock-shop' create serviceaccount jenkins-robot
 # The next line gives `jenkins-robot` administator permissions for this namespace.
 # * You can make it an admin over all namespaces by creating a `ClusterRoleBinding` instead of a `RoleBinding`.
 # * You can also give it different permissions by binding it to a different `(Cluster)Role`.
-kubectl -n 'sock-shop' create rolebinding jenkins-robot-binding --clusterrole=cluster-admin --serviceaccount='sock-shop':jenkins-robot
+# kubectl -n 'sock-shop' create rolebinding jenkins-robot-binding --clusterrole=cluster-admin --serviceaccount='sock-shop':jenkins-robot
 
-kubectl port-forward --address 0.0.0.0 svc/jenkins 8080:8080 &
+kubectl port-forward --address 0.0.0.0 svc/jenkins 80:8080 &
