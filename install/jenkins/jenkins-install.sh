@@ -17,7 +17,7 @@ helm install jenkins jenkins/jenkins \
 --set controller.servicePort=80 \
 --set controller.jenkinsOpts="$jkopt1 $jkopt2" \
 --set controller.javaOpts="$jvopt1" \
--f ./jenkins-values.yaml
+-f jenkins-values.yaml
 
 # Create a ServiceAccount named `jenkins-robot` in a given namespace.
 kubectl -n 'sock-shop' create serviceaccount jenkins-robot
